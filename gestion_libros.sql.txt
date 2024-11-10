@@ -1,0 +1,53 @@
+DROP DATABASE IF EXISTS gestion_libros;
+CREATE DATABASE gestion_libros;
+USE gestion_libros;
+
+CREATE TABLE autores (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(255) NOT NULL,
+    nacionalidad VARCHAR(100)
+);
+
+CREATE TABLE categorias (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE libros (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    titulo VARCHAR(255) NOT NULL,
+    id_autor INT,
+    id_categoria INT,
+    isbn VARCHAR(20),
+    anio_publicacion YEAR,
+    num_paginas INT,
+    CONSTRAINT fk_autor FOREIGN KEY (id_autor) REFERENCES autores(id),
+    CONSTRAINT fk_categoria FOREIGN KEY (id_categoria) REFERENCES categorias(id)
+);
+
+CREATE TABLE usuarios (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    fecha_registro DATE
+);
+
+INSERT INTO autores (nombre, nacionalidad) VALUES 
+('Gabriel García Márquez', 'Colombiano'),
+('Isabel Allende', 'Chilena'),
+('Julio Cortázar', 'Argentino');
+
+INSERT INTO categorias (nombre) VALUES 
+('Novela'),
+('Ciencia Ficción'),
+('Poesía');
+
+INSERT INTO libros (titulo, id_autor, id_categoria, isbn, anio_publicacion, num_paginas) VALUES 
+('Cien Años de Soledad', 1, 1, '978-84-376-0494-7', 1967, 471),
+('La Casa de los Espíritus', 2, 1, '978-84-233-1620-2', 1982, 448),
+('Rayuela', 3, 1, '978-84-339-4514-4', 1963, 736);
+
+INSERT INTO usuarios (nombre, email, fecha_registro) VALUES 
+('Juan Pérez', 'juan.perez@example.com', '2023-01-15'),
+('Ana Gómez', 'ana.gomez@example.com', '2023-02-20'),
+('Carlos López', 'carlos.lopez@example.com', '2023-03-10');

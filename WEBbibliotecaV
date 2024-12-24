@@ -1,0 +1,388 @@
+BIBLIOTECA.GO
+
+package main
+
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+)
+
+// Estructura para los libros
+type Libro struct {
+	ID              int    `json:"id"`
+	Titulo          string `json:"titulo"`
+	Autor           string `json:"autor"`
+	Categoria       string `json:"categoria"`
+	ISBN            string `json:"isbn"`
+	AnioPublicacion int    `json:"anioPublicacion"`
+	NumPaginas      int    `json:"numPaginas"`
+}
+
+// Datos iniciales
+var libros = []Libro{
+	{1, "Cien Años de Soledad", "Gabriel García Márquez", "Novela", "978-84-376-0494-7", 1967, 471},
+	{2, "1984", "George Orwell", "Ciencia Ficción", "978-84-7608-749-9", 1949, 328},
+}
+
+// Handler para listar libros
+func listarLibrosHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(libros)
+}
+
+func main() {
+	// Ruta para la API de libros
+	http.HandleFunc("/api/libros", listarLibrosHandler)
+
+	// Servir archivos estáticos desde la carpeta `public`
+	http.Handle("/", http.FileServer(http.Dir("./public")))
+
+	// Iniciar servidor en el puerto 8080
+	log.Println("Servidor iniciado en http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+INDEX.HTML
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Virtual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Biblioteca Virtual</h1>
+
+    <!-- Sección de Libros -->
+    <button id="btnToggleLibros">Mostrar Libros</button>
+    <div id="librosSection" style="display: none;">
+        <h2>Libros disponibles</h2>
+        <ul id="listaLibros"></ul>
+        <h3>Registrar Libro</h3>
+        <form id="formRegistrarLibro">
+            <input type="text" id="tituloLibro" placeholder="Título" required>
+            <input type="text" id="autorLibro" placeholder="Autor" required>
+            <button type="submit">Registrar Libro</button>
+        </form>
+        <h3>Eliminar Libro</h3>
+        <form id="formEliminarLibro">
+            <input type="number" id="idLibroEliminar" placeholder="ID del libro" required>
+            <button type="submit">Eliminar Libro</button>
+        </form>
+    </div>
+
+    <!-- Sección de Usuarios -->
+    <button id="btnToggleUsuarios">Mostrar Usuarios</button>
+    <div id="usuariosSection" style="display: none;">
+        <h2>Usuarios registrados</h2>
+        <ul id="listaUsuarios"></ul>
+        <h3>Registrar Usuario</h3>
+        <form id="formRegistrarUsuario">
+            <input type="text" id="nombreUsuario" placeholder="Nombre" required>
+            <button type="submit">Registrar Usuario</button>
+        </form>
+        <h3>Eliminar Usuario</h3>
+        <form id="formEliminarUsuario">
+            <input type="number" id="idUsuarioEliminar" placeholder="ID del usuario" required>
+            <button type="submit">Eliminar Usuario</button>
+        </form>
+    </div>
+
+    <!-- Sección de Préstamos -->
+    <button id="btnTogglePrestamos">Mostrar Préstamos</button>
+    <div id="prestamosSection" style="display: none;">
+        <h2>Préstamos realizados</h2>
+        <ul id="listaPrestamos"></ul>
+        <h3>Registrar Préstamo</h3>
+        <form id="formRegistrarPrestamo">
+            <input type="number" id="idUsuarioPrestamo" placeholder="ID Usuario" required>
+            <input type="number" id="idLibroPrestamo" placeholder="ID Libro" required>
+            <button type="submit">Registrar Préstamo</button>
+        </form>
+        <h3>Registrar Devolución</h3>
+        <form id="formRegistrarDevolucion">
+            <input type="number" id="idDevolucionPrestamo" placeholder="ID Préstamo" required>
+            <button type="submit">Registrar Devolución</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+DATA.JSON
+
+[
+    {
+        "id": 1,
+        "titulo": "Cien Años de Soledad",
+        "autor": "Gabriel García Márquez",
+        "categoria": "Novela",
+        "isbn": "978-84-376-0494-7",
+        "anioPublicacion": 1967,
+        "numPaginas": 471
+    },
+    {
+        "id": 2,
+        "titulo": "1984",
+        "autor": "George Orwell",
+        "categoria": "Ciencia Ficción",
+        "isbn": "978-84-7608-749-9",
+        "anioPublicacion": 1949,
+        "numPaginas": 328
+    }
+]
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+SCRIPT.JS
+
+// Datos iniciales
+const libros = [
+    { id: 1, titulo: "Cien Años de Soledad", autor: "Gabriel García Márquez" },
+    { id: 2, titulo: "1984", autor: "George Orwell" },
+    { id: 3, titulo: "El Quijote", autor: "Miguel de Cervantes" },
+];
+const usuarios = [
+    { id: 1, nombre: "Juan Pérez" },
+    { id: 2, nombre: "María López" },
+];
+const prestamos = [];
+
+// Funciones para renderizar listas
+function renderizarLibros() {
+    const listaLibros = document.getElementById("listaLibros");
+    listaLibros.innerHTML = "";
+    libros.forEach(libro => {
+        const li = document.createElement("li");
+        li.textContent = `${libro.titulo} - ${libro.autor} (ID: ${libro.id})`;
+        listaLibros.appendChild(li);
+    });
+}
+
+function renderizarUsuarios() {
+    const listaUsuarios = document.getElementById("listaUsuarios");
+    listaUsuarios.innerHTML = "";
+    usuarios.forEach(usuario => {
+        const li = document.createElement("li");
+        li.textContent = `${usuario.nombre} (ID: ${usuario.id})`;
+        listaUsuarios.appendChild(li);
+    });
+}
+
+function renderizarPrestamos() {
+    const listaPrestamos = document.getElementById("listaPrestamos");
+    listaPrestamos.innerHTML = "";
+    prestamos.forEach(prestamo => {
+        const libro = libros.find(l => l.id === prestamo.libroId);
+        const usuario = usuarios.find(u => u.id === prestamo.usuarioId);
+        const li = document.createElement("li");
+        li.textContent = `Préstamo ID: ${prestamo.id}, Libro: ${libro.titulo}, Usuario: ${usuario.nombre}, Fecha: ${prestamo.fechaPrestamo}`;
+        listaPrestamos.appendChild(li);
+    });
+}
+
+// Registrar libro
+document.getElementById("formRegistrarLibro").addEventListener("submit", e => {
+    e.preventDefault();
+    const titulo = document.getElementById("tituloLibro").value;
+    const autor = document.getElementById("autorLibro").value;
+    const nuevoLibro = { id: libros.length + 1, titulo, autor };
+    libros.push(nuevoLibro);
+    renderizarLibros();
+    e.target.reset();
+});
+
+// Eliminar libro
+document.getElementById("formEliminarLibro").addEventListener("submit", e => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("idLibroEliminar").value);
+    const index = libros.findIndex(libro => libro.id === id);
+    if (index !== -1) {
+        libros.splice(index, 1);
+        renderizarLibros();
+    } else {
+        alert("Libro no encontrado.");
+    }
+    e.target.reset();
+});
+
+// Registrar usuario
+document.getElementById("formRegistrarUsuario").addEventListener("submit", e => {
+    e.preventDefault();
+    const nombre = document.getElementById("nombreUsuario").value;
+    const nuevoUsuario = { id: usuarios.length + 1, nombre };
+    usuarios.push(nuevoUsuario);
+    renderizarUsuarios();
+    e.target.reset();
+});
+
+// Eliminar usuario
+document.getElementById("formEliminarUsuario").addEventListener("submit", e => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("idUsuarioEliminar").value);
+    const index = usuarios.findIndex(usuario => usuario.id === id);
+    if (index !== -1) {
+        usuarios.splice(index, 1);
+        renderizarUsuarios();
+    } else {
+        alert("Usuario no encontrado.");
+    }
+    e.target.reset();
+});
+
+// Registrar préstamo
+document.getElementById("formRegistrarPrestamo").addEventListener("submit", e => {
+    e.preventDefault();
+    const usuarioId = parseInt(document.getElementById("idUsuarioPrestamo").value);
+    const libroId = parseInt(document.getElementById("idLibroPrestamo").value);
+    const nuevoPrestamo = {
+        id: prestamos.length + 1,
+        usuarioId,
+        libroId,
+        fechaPrestamo: new Date().toISOString().split("T")[0],
+    };
+    prestamos.push(nuevoPrestamo);
+    renderizarPrestamos();
+    e.target.reset();
+});
+
+// Registrar devolución
+document.getElementById("formRegistrarDevolucion").addEventListener("submit", e => {
+    e.preventDefault();
+    const prestamoId = parseInt(document.getElementById("idDevolucionPrestamo").value);
+
+    // Buscar el préstamo por ID
+    const prestamoIndex = prestamos.findIndex(p => p.id === prestamoId);
+    if (prestamoIndex !== -1) {
+        const prestamo = prestamos[prestamoIndex];
+        if (prestamo.fechaDevolucion) {
+            alert("El préstamo ya fue devuelto.");
+        } else {
+            prestamo.fechaDevolucion = new Date().toISOString().split("T")[0];
+            alert(`Devolución registrada con éxito para el préstamo ID: ${prestamoId}`);
+            prestamos.splice(prestamoIndex, 1); // Eliminar el préstamo de la lista
+            renderizarPrestamos();
+        }
+    } else {
+        alert("Préstamo no encontrado. Verifique el ID.");
+    }
+
+    e.target.reset();
+});
+
+
+
+// Botones para mostrar/ocultar secciones
+document.getElementById("btnToggleLibros").addEventListener("click", () => {
+    toggleSection("librosSection", "btnToggleLibros", "Mostrar Libros", "Ocultar Libros");
+});
+
+document.getElementById("btnToggleUsuarios").addEventListener("click", () => {
+    toggleSection("usuariosSection", "btnToggleUsuarios", "Mostrar Usuarios", "Ocultar Usuarios");
+});
+
+document.getElementById("btnTogglePrestamos").addEventListener("click", () => {
+    toggleSection("prestamosSection", "btnTogglePrestamos", "Mostrar Préstamos", "Ocultar Préstamos");
+});
+
+function toggleSection(sectionId, buttonId, showText, hideText) {
+    const section = document.getElementById(sectionId);
+    const button = document.getElementById(buttonId);
+    if (section.style.display === "none") {
+        section.style.display = "block";
+        button.textContent = hideText;
+    } else {
+        section.style.display = "none";
+        button.textContent = showText;
+    }
+}
+
+// Renderizar datos iniciales
+renderizarLibros();
+renderizarUsuarios();
+renderizarPrestamos();
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+STYLE.CSS
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+    margin: 0;
+}
+
+h2 {
+    color: #007bff;
+}
+
+button {
+    padding: 10px 15px;
+    margin: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+form {
+    margin: 20px auto;
+    text-align: left;
+    width: 80%;
+    max-width: 500px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 500px;
+    text-align: left;
+}
+
+li {
+    padding: 10px;
+    background-color: #e9ecef;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
